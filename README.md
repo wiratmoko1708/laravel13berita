@@ -65,6 +65,149 @@ Buka <http://127.0.0.1:8000>.
 
 > **Penting:** ganti password ini sebelum aplikasi dipakai orang lain.
 
+## Menjalankan di Windows 11 (clone dari GitHub)
+
+Repositori: <https://github.com/wiratmoko1708/laravel13berita.git> (branch `main`).
+
+### 1. Pasang perkakas (sekali saja)
+
+| Perkakas | Sumber | Catatan |
+|---|---|---|
+| Git for Windows | <https://git-scm.com/download/win> | sudah termasuk *Git Bash* & *Credential Manager* |
+| PHP 8.3+ | <https://windows.php.net/download/> atau Laragon/XAMPP | aktifkan ekstensi `fileinfo`, `mbstring`, `openssl`, `pdo_mysql`, `zip` |
+| Composer | <https://getcomposer.org/download/> | pilih *Composer-Setup.exe* |
+| Node.js LTS | <https://nodejs.org/> | butuh Node 20.19+ / 22.12+ untuk Vite 8 |
+| MySQL/MariaDB | Laragon/XAMPP atau <https://dev.mysql.com/downloads/installer/> | MySQL 8+ atau MariaDB 10.6+ |
+
+Cek semuanya di **PowerShell** atau **Git Bash**:
+
+```powershell
+git --version
+php -v
+composer -V
+node -v
+npm -v
+```
+
+Jika muncul *"php is not recognized"*, tambahkan folder PHP ke **Environment Variables → Path**,
+lalu tutup dan buka ulang terminal.
+
+### 2. Clone repositori
+
+Buka **PowerShell**, lalu pilih folder kerja (contoh `C:\laragon\www` atau `D:\projek`):
+
+```powershell
+cd C:\laragon\www
+git clone https://github.com/wiratmoko1708/laravel13berita.git
+cd laravel13berita
+```
+
+Saat pertama kali `clone`/`push`, jendela *Git Credential Manager* akan terbuka — login ke akun
+GitHub `wiratmoko1708` lewat browser. Kredensial disimpan otomatis, jadi tidak perlu mengetik
+password lagi.
+
+Alternatif tanpa terminal: buka halaman repo → tombol **Code** → **Download ZIP**, ekstrak,
+lalu lanjut ke langkah 3 (tanpa riwayat git).
+
+### 3. Siapkan file `.env`
+
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Command Prompt (cmd):
+
+```bat
+copy .env.example .env
+```
+
+Buka `.env` (Notepad/VS Code) dan sesuaikan kredensial database:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=db_berita
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+> Laragon/XAMPP umumnya memakai `root` tanpa password. Jika MySQL Anda berpassword, isi `DB_PASSWORD`.
+
+### 4. Buat database
+
+Lewat phpMyAdmin (<http://localhost/phpmyadmin>) buat database `db_berita` dengan collation
+`utf8mb4_unicode_ci`, **atau** lewat terminal:
+
+```powershell
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS db_berita CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
+
+### 5. Instal dependensi, migrasi, dan build aset
+
+```powershell
+composer install
+php artisan key:generate
+php artisan migrate
+php artisan db:seed --class=AdminSeeder
+php artisan storage:link
+npm install
+npm run build
+```
+
+Catatan Windows:
+
+- `php artisan storage:link` membuat *symlink*. Jika gagal, aktifkan **Settings → System →
+  For developers → Developer Mode**, atau jalankan PowerShell **as Administrator**.
+- Jika `php artisan storage:link` tetap gagal, gambar berita tidak akan tampil; jalankan
+  perintahnya sekali saja dengan hak admin.
+- `npm install` memakai `.npmrc` proyek (`ignore-scripts=true`), jadi aman dijalankan apa adanya.
+
+### 6. Jalankan aplikasi
+
+```powershell
+php artisan serve
+```
+
+Buka <http://127.0.0.1:8000>. Login admin: `admin@berita.test` / `admin12345`.
+
+Untuk mode pengembangan (server + Vite hot reload sekaligus):
+
+```powershell
+composer run dev
+```
+
+### 7. Perintah Git harian di Windows
+
+```powershell
+git status                  # lihat perubahan
+git pull origin main        # ambil update terbaru
+git add .
+git commit -m "pesan perubahan"
+git push origin main        # kirim ke GitHub
+```
+
+Jika `git push` ditolak karena `main` sudah berubah:
+
+```powershell
+git pull --rebase origin main
+git push origin main
+```
+
+### 8. Masalah yang sering muncul di Windows
+
+| Gejala | Penyebab & solusi |
+|---|---|
+| `php is not recognized` | PHP belum masuk `PATH` → tambahkan di Environment Variables, buka terminal baru |
+| `could not find driver` (pdo_mysql) | ekstensi `pdo_mysql` belum aktif di `php.ini` |
+| `Vite manifest not found` | jalankan `npm run build` (atau `npm run dev` saat mengembangkan) |
+| Port 8000 dipakai | `php artisan serve --port=8080` |
+| `npm install` lambat/gagal | hapus `node_modules` + `package-lock.json`, ulangi `npm install` |
+| Warning `LF will be replaced by CRLF` | normal; `.gitattributes` proyek memaksa LF di repo, abaikan saja |
+| Gambar berita tidak muncul | `php artisan storage:link` belum dijalankan |
+
 ## Route penting
 
 | URL | Keterangan | Akses |
