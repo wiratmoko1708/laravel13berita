@@ -34,9 +34,12 @@ posts      : id, user_id, category_id, judul, slug, ringkasan, isi,
 
 ## Cara menjalankan
 
-```bash
-# 1. Masuk ke folder proyek
-cd /Users/wikanwiratmoko/Sites/berita
+> Contoh di bawah memakai **XAMPP di Windows 11** (folder `htdocs`).
+> Jika memakai macOS/Linux, ganti langkah 1 dengan `cd /path/ke/laravel13berita`.
+
+```powershell
+# 1. Masuk ke folder proyek (XAMPP htdocs)
+cd C:\xampp\htdocs\laravel13berita
 
 # 2. Siapkan database (sekali saja)
 mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS db_berita CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
@@ -74,10 +77,10 @@ Repositori: <https://github.com/wiratmoko1708/laravel13berita.git> (branch `main
 | Perkakas | Sumber | Catatan |
 |---|---|---|
 | Git for Windows | <https://git-scm.com/download/win> | sudah termasuk *Git Bash* & *Credential Manager* |
-| PHP 8.3+ | <https://windows.php.net/download/> atau Laragon/XAMPP | aktifkan ekstensi `fileinfo`, `mbstring`, `openssl`, `pdo_mysql`, `zip` |
+| PHP 8.3+ | XAMPP (<https://www.apachefriends.org/>) | aktifkan ekstensi `fileinfo`, `mbstring`, `openssl`, `pdo_mysql`, `zip` di `C:\xampp\php\php.ini` |
 | Composer | <https://getcomposer.org/download/> | pilih *Composer-Setup.exe* |
 | Node.js LTS | <https://nodejs.org/> | butuh Node 20.19+ / 22.12+ untuk Vite 8 |
-| MySQL/MariaDB | Laragon/XAMPP atau <https://dev.mysql.com/downloads/installer/> | MySQL 8+ atau MariaDB 10.6+ |
+| MySQL/MariaDB | sudah termasuk XAMPP (jalankan **MySQL** dari XAMPP Control Panel) | MySQL 8+ atau MariaDB 10.6+ |
 
 Cek semuanya di **PowerShell** atau **Git Bash**:
 
@@ -94,10 +97,10 @@ lalu tutup dan buka ulang terminal.
 
 ### 2. Clone repositori
 
-Buka **PowerShell**, lalu pilih folder kerja (contoh `C:\laragon\www` atau `D:\projek`):
+Buka **PowerShell**, lalu masuk ke folder `htdocs` XAMPP:
 
 ```powershell
-cd C:\laragon\www
+cd C:\xampp\htdocs
 git clone https://github.com/wiratmoko1708/laravel13berita.git
 cd laravel13berita
 ```
@@ -134,7 +137,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-> Laragon/XAMPP umumnya memakai `root` tanpa password. Jika MySQL Anda berpassword, isi `DB_PASSWORD`.
+> XAMPP memakai user `root` tanpa password secara default. Jika MySQL Anda berpassword, isi `DB_PASSWORD`.
 
 ### 4. Buat database
 
@@ -179,6 +182,17 @@ Untuk mode pengembangan (server + Vite hot reload sekaligus):
 composer run dev
 ```
 
+**Alternatif lewat Apache XAMPP** (karena proyek ada di `htdocs`): jalankan **Apache** + **MySQL**
+di XAMPP Control Panel, lalu buka <http://localhost/laravel13berita/public>.
+Jika memakai cara ini, sesuaikan `.env` agar aset & gambar tidak rusak:
+
+```dotenv
+APP_URL=http://localhost/laravel13berita/public
+```
+
+lalu `php artisan config:clear`. Cara paling aman tetap `php artisan serve` (langkah di atas),
+karena `APP_URL` bawaan sudah cocok.
+
 ### 7. Perintah Git harian di Windows
 
 ```powershell
@@ -207,6 +221,9 @@ git push origin main
 | `npm install` lambat/gagal | hapus `node_modules` + `package-lock.json`, ulangi `npm install` |
 | Warning `LF will be replaced by CRLF` | normal; `.gitattributes` proyek memaksa LF di repo, abaikan saja |
 | Gambar berita tidak muncul | `php artisan storage:link` belum dijalankan |
+| Apache XAMPP tidak mau start (port 80) | dipakai IIS/Skype → XAMPP Control Panel → **Config → httpd.conf**, ubah `Listen 80` jadi `Listen 8080`, akses `http://localhost:8080/laravel13berita/public` |
+| Halaman `localhost/laravel13berita` kosong/404 | buka lewat `/public`, atau pakai `php artisan serve` |
+| `Access denied for user 'root'` | MySQL XAMPP belum start, atau password root sudah diisi di `.env` |
 
 ## Route penting
 
